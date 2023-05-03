@@ -47,7 +47,7 @@ var shortByYearBiomassQuery = "SELECT * from \"abu_bio_by_year_eng\"";
 const trackLinesQuery = "select * from \"track_lines_eng\"";
 
 // Gets the samples for a given haul
-const haulSamplesQuery = "SELECT CASE WHEN species_e.\"English\" IS NULL THEN \"species\".\"ScientificName\" ELSE species_e.\"English\" END AS \"NomEspecie\", \"species\".\"EnglishName\" as \"NomComu\", sum(\"sample\".\"Biomass\") as \"Biomassa\", classification_e.\"English\" AS \"ClassificacioCaptura\" FROM \"sample\" INNER JOIN \"haul\" ON \"sample\".\"HaulId\" = \"haul\".\"Id\" INNER JOIN \"cruise\" ON \"haul\".\"CruiseId\" = \"cruise\".\"Id\" inner join \"species\" on \"sample\".\"SpecieId\" = \"species\".\"Id\" inner join \"port\" on \"cruise\".\"PortId\" = \"port\".\"Id\" LEFT JOIN translation classification_e ON sample.\"Classification\"::text = classification_e.\"Catalan\"::text LEFT JOIN translation species_e ON \"species\".\"ScientificName\"::text = species_e.\"Catalan\"::text WHERE \"sample\".\"HaulId\" = '0000' group by species_e.\"English\", \"species\".\"ScientificName\", \"species\".\"EnglishName\", \"ClassificacioCaptura\"";
+const haulSamplesQuery = "SELECT CASE WHEN species_e.\"English\" IS NULL THEN \"species\".\"ScientificName\" ELSE species_e.\"English\" END AS \"ScientificName\", \"species\".\"EnglishName\" as \"EnglishName\", sum(\"sample\".\"Biomass\") as \"Biomass_Kg_Km2\", classification_e.\"English\" AS \"Classification\" FROM \"sample\" INNER JOIN \"haul\" ON \"sample\".\"HaulId\" = \"haul\".\"Id\" INNER JOIN \"cruise\" ON \"haul\".\"CruiseId\" = \"cruise\".\"Id\" inner join \"species\" on \"sample\".\"SpecieId\" = \"species\".\"Id\" inner join \"port\" on \"cruise\".\"PortId\" = \"port\".\"Id\" LEFT JOIN translation classification_e ON sample.\"Classification\"::text = classification_e.\"Catalan\"::text LEFT JOIN translation species_e ON \"species\".\"ScientificName\"::text = species_e.\"Catalan\"::text WHERE \"sample\".\"HaulId\" = '0000' group by species_e.\"English\", \"species\".\"ScientificName\", \"species\".\"EnglishName\", classification_e.\"English\"";
 
 // Get the frequency of sizes given a species
 const sizesQuery = "SELECT * FROM \"sf_by_area_eng\"";//\"sf_by_year\"";
@@ -216,7 +216,7 @@ function saveJS_translation(tQuery, filename){
 //saveJSON(byPortQuery, "pesca_arrossegament_port_biomassa");
 //saveJSON(shortByYearBiomassQuery, "pesca_arrossegament_any_biomassa");
 
-//saveJSON(bySeasonBiomassQuery, "pesca_arrossegament_estacio_biomassa");
+//saveJSON(bySeasonBiomassQuery, "pesca_arrossegament_estacio_biomassa"); //deprecated
 //saveJSON(bySampleQuery, "samples");
 
 //saveJSON(trackLinesQuery, "trackLines");
@@ -225,7 +225,7 @@ function saveJS_translation(tQuery, filename){
 //saveJSON(sizesQuery, "sizes");
 //saveJS_palette(paletteQuery, "palette");
 
-saveJS_translation(translationsCaQuery, 'species_ca');
-saveJS_translation(translationsEsQuery, 'species_es');
-saveJS_translation(translationsEnQuery, 'species_en');
-//saveJS_translation(translationsFrQuery, 'fr');
+//saveJS_translation(translationsCaQuery, 'species_ca');
+//saveJS_translation(translationsEsQuery, 'species_es');
+//saveJS_translation(translationsEnQuery, 'species_en');
+//saveJS_translation(translationsFrQuery, 'species_fr');
