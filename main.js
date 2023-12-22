@@ -34,6 +34,7 @@ const port = 8080;
 // Set up your database query
 var trawlingQuery = "SELECT \"Id\", \"Date\", \"PortId\", \"FishingArtName\", \"Season\" FROM public.cruise WHERE \"FishingArtName\" = 'ARROSSEGAMENT'";
 var byPortQuery = "SELECT * FROM \"abu_bio_by_port_eng\"";
+var byPortPSQuery = "SELECT * FROM \"abu_bio_by_port_ps_eng\"";
 var tablesQuery = "SELECT * FROM pg_catalog.pg_tables WHERE schemaname != 'pg_catalog' AND schemaname != 'information_schema'";
 var bySampleQuery = "SELECT \"SpecieId\", \"HaulId\",\"Biomass\" FROM \"sample\"";
 
@@ -42,6 +43,7 @@ var bySampleQuery = "SELECT \"SpecieId\", \"HaulId\",\"Biomass\" FROM \"sample\"
 var bySeasonBiomassQuery = "WITH \"abHaul\" as (select \"port\".\"Area\" as \"ZonaPort\", \"cruise\".\"Season\" as \"Estacio\", \"cruise\".\"FishingArtName\" as \"TipusPesca\",\"haul\".\"Code\" as \"CodiPesca\", \"species\".\"ScientificName\" as \"NomEspecie\", \"species\".\"CatalanName\" as \"NomCatala\", CASE WHEN \"species\".\"IsWaste\" THEN 'Residus'	WHEN \"sample\".\"Category\" = 'Rebuig' or \"sample\".\"Category\" = 'No comercial' THEN 'Rebuig'	ELSE 'Comercial'END AS \"ClassificacioCaptura\", \"species\".\"WasteType\" as \"TipusResidus\", sum(\"sample\".\"Abundance\") as \"SumaAbundancia\", sum(\"sample\".\"Biomass\") as \"SumaBiomassa\"	from \"sample\"	inner join \"haul\" on \"sample\".\"HaulId\" = \"haul\".\"Id\"	inner join \"cruise\" on \"haul\".\"CruiseId\" = \"cruise\".\"Id\"	inner join \"port\" on \"cruise\".\"PortId\" = \"port\".\"Id\"	inner join \"species\" on \"sample\".\"SpecieId\" = \"species\".\"Id\"	where \"ProjectId\" = 1 and \"Date\"<'2021-01-01' and \"FishingArtName\"='ARROSSEGAMENT' group by \"port\".\"Area\", \"cruise\".\"Season\", \"cruise\".\"FishingArtName\", \"haul\".\"Code\", \"species\".\"ScientificName\", \"species\".\"CatalanName\", \"ClassificacioCaptura\", \"species\".\"WasteType\"), \"countHaul\" as (	select \"port\".\"Area\" as \"ZonaPort\", \"cruise\".\"Season\" as \"Estacio\", \"cruise\".\"FishingArtName\" as \"TipusPesca\",	count(distinct(\"haul\".\"Code\")) as \"NumPesques\" 	from \"haul\"	inner join \"cruise\" on \"haul\".\"CruiseId\" = \"cruise\".\"Id\"	inner join \"port\" on \"cruise\".\"PortId\" = \"port\".\"Id\"	where \"ProjectId\" = 1 and \"Date\"<'2021-01-01' and \"FishingArtName\"='ARROSSEGAMENT'	group by \"port\".\"Area\", \"cruise\".\"Season\", \"cruise\".\"FishingArtName\"	)select \"abHaul\".\"ZonaPort\", \"abHaul\".\"Estacio\", \"abHaul\".\"TipusPesca\", \"abHaul\".\"NomEspecie\", \"abHaul\".\"NomCatala\",  \"abHaul\".\"ClassificacioCaptura\", \"abHaul\".\"TipusResidus\", round(sum(\"SumaAbundancia\")/\"NumPesques\",3) as \"Abundancia_NIndividus_Km2\", round(sum(\"SumaBiomassa\")/\"NumPesques\",3) as \"Biomassa_Kg_Km2\" from \"abHaul\" inner join \"countHaul\" on \"abHaul\".\"ZonaPort\"=\"countHaul\".\"ZonaPort\" and \"abHaul\".\"Estacio\"=\"countHaul\".\"Estacio\" and \"abHaul\".\"TipusPesca\"=\"countHaul\".\"TipusPesca\" group by \"abHaul\".\"ZonaPort\", \"abHaul\".\"Estacio\", \"abHaul\".\"TipusPesca\", \"abHaul\".\"NomEspecie\", \"abHaul\".\"NomCatala\", \"abHaul\".\"ClassificacioCaptura\",  \"abHaul\".\"TipusResidus\", \"NumPesques\"";
 
 var shortByYearBiomassQuery = "SELECT * from \"abu_bio_by_year_eng\"";
+var shortByYearBiomassPSQuery = "SELECT * from \"abu_bio_by_year_ps_eng\"";
 //var byYearBiomassQuery = "WITH \"abHaul\" as ( select date_part('year', \"cruise\".\"Date\") as \"Any\", \"port\".\"Area\" as \"ZonaPort\", \"cruise\".\"Season\" as \"Estacio\", \"cruise\".\"FishingArtName\" as \"TipusPesca\", \"haul\".\"Code\" as \"CodiPesca\", \"species\".\"ScientificName\" as \"NomEspecie\", \"species\".\"CatalanName\" as \"NomCatala\", CASE WHEN \"species\".\"IsWaste\" THEN 'Residus' WHEN \"sample\".\"Category\" = 'Rebuig' or \"sample\".\"Category\" = 'No comercial' THEN 'Rebuig' ELSE 'Comercial' END AS \"ClassificacioCaptura\", \"species\".\"WasteType\" as \"TipusResidus\", sum(\"sample\".\"Abundance\") as \"SumaAbundancia\", sum(\"sample\".\"Biomass\") as \"SumaBiomassa\" from \"sample\" inner join \"haul\" on \"sample\".\"HaulId\" = \"haul\".\"Id\" inner join \"cruise\" on \"haul\".\"CruiseId\" = \"cruise\".\"Id\" inner join \"port\" on \"cruise\".\"PortId\" = \"port\".\"Id\" inner join \"species\" on \"sample\".\"SpecieId\" = \"species\".\"Id\" where \"ProjectId\" = 1 and \"Date\"<'2021-01-01' and \"FishingArtName\"='ARROSSEGAMENT' group by date_part('year', \"cruise\".\"Date\"), \"port\".\"Area\", \"cruise\".\"Season\", \"cruise\".\"FishingArtName\", \"haul\".\"Code\", \"species\".\"ScientificName\", \"species\".\"CatalanName\", \"ClassificacioCaptura\", \"species\".\"WasteType\" ), \"countHaul\" as ( select date_part('year', \"cruise\".\"Date\") as \"Any\", \"port\".\"Area\" as \"ZonaPort\", \"cruise\".\"Season\" as \"Estacio\", \"cruise\".\"FishingArtName\" as \"TipusPesca\", count(distinct(\"haul\".\"Code\")) as \"NumPesques\" from \"haul\" inner join \"cruise\" on \"haul\".\"CruiseId\" = \"cruise\".\"Id\" inner join \"port\" on \"cruise\".\"PortId\" = \"port\".\"Id\" where \"ProjectId\" = 1 and \"Date\"<'2021-01-01' and \"FishingArtName\"='ARROSSEGAMENT' group by date_part('year', \"cruise\".\"Date\"), \"port\".\"Area\", \"cruise\".\"Season\", \"cruise\".\"FishingArtName\" ) select \"abHaul\".\"Any\", \"abHaul\".\"ZonaPort\", \"abHaul\".\"Estacio\", \"abHaul\".\"TipusPesca\", \"abHaul\".\"NomEspecie\", \"abHaul\".\"NomCatala\", \"abHaul\".\"ClassificacioCaptura\", \"abHaul\".\"TipusResidus\", round(sum(\"SumaAbundancia\")/\"NumPesques\",3) as \"Abundancia_NIndividus_Km2\", round(sum(\"SumaBiomassa\")/\"NumPesques\",3) as \"Biomassa_Kg_Km2\" from \"abHaul\" inner join \"countHaul\" on \"abHaul\".\"Any\"=\"countHaul\".\"Any\" and \"abHaul\".\"ZonaPort\"=\"countHaul\".\"ZonaPort\" and \"abHaul\".\"Estacio\"=\"countHaul\".\"Estacio\" and \"abHaul\".\"TipusPesca\"=\"countHaul\".\"TipusPesca\" group by \"abHaul\".\"Any\", \"abHaul\".\"ZonaPort\", \"abHaul\".\"Estacio\", \"abHaul\".\"TipusPesca\", \"abHaul\".\"NomEspecie\", \"abHaul\".\"NomCatala\", \"abHaul\".\"ClassificacioCaptura\", \"abHaul\".\"TipusResidus\", \"NumPesques\""
 // Get the track lines for the trawling sampled cruises
 const trackLinesQuery = "select * from \"track_lines_eng\"";
@@ -51,6 +53,7 @@ const haulSamplesQuery = "SELECT CASE WHEN species_e.\"English\" IS NULL THEN \"
 
 // Get the frequency of sizes given a species
 const sizesQuery = "SELECT * FROM \"sf_by_area_eng\"";//\"sf_by_year\"";
+const sizesPSQuery = "SELECT * FROM \"sf_by_year_ps_eng\"";//\"sf_by_year\"";
 // Get color palette
 const paletteQuery = "SELECT * FROM \"color_palette_eng\"";
 // Get translations
@@ -215,6 +218,8 @@ function saveJS_translation(tQuery, filename){
 
 //saveJSON(byPortQuery, "pesca_arrossegament_port_biomassa");
 //saveJSON(shortByYearBiomassQuery, "pesca_arrossegament_any_biomassa");
+//saveJSON(byPortPSQuery, "ps_port_biomass");
+//saveJSON(shortByYearBiomassPSQuery, "ps_year_biomass");
 
 //saveJSON(bySeasonBiomassQuery, "pesca_arrossegament_estacio_biomassa"); //deprecated
 //saveJSON(bySampleQuery, "samples");
@@ -223,6 +228,8 @@ function saveJS_translation(tQuery, filename){
 //generateHaulStaticFiles();
 
 //saveJSON(sizesQuery, "sizes");
+saveJSON(sizesPSQuery, "ps_sizes");
+
 //saveJS_palette(paletteQuery, "palette");
 
 //saveJS_translation(translationsCaQuery, 'species_ca');
