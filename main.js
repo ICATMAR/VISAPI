@@ -53,10 +53,10 @@ const trackPointsPSQuery = "select * from \"track_points_ps_eng\"";
 const haulSamplesQuery = "SELECT CASE WHEN species_e.\"English\" IS NULL THEN \"species\".\"ScientificName\" ELSE species_e.\"English\" END AS \"ScientificName\", \"species\".\"EnglishName\" as \"EnglishName\", sum(\"sample\".\"Biomass\") as \"Biomass_Kg_Km2\", classification_e.\"English\" AS \"Classification\" FROM \"sample\" INNER JOIN \"haul\" ON \"sample\".\"HaulId\" = \"haul\".\"Id\" INNER JOIN \"cruise\" ON \"haul\".\"CruiseId\" = \"cruise\".\"Id\" inner join \"species\" on \"sample\".\"SpecieId\" = \"species\".\"Id\" inner join \"port\" on \"cruise\".\"PortId\" = \"port\".\"Id\" LEFT JOIN translation classification_e ON sample.\"Classification\"::text = classification_e.\"Catalan\"::text LEFT JOIN translation species_e ON \"species\".\"ScientificName\"::text = species_e.\"Catalan\"::text WHERE \"sample\".\"HaulId\" = '0000' group by species_e.\"English\", \"species\".\"ScientificName\", \"species\".\"EnglishName\", classification_e.\"English\"";
 
 //const haulSamplesPSQuery = "SELECT CASE WHEN species_e.\"English\" IS NULL THEN \"species\".\"ScientificName\" ELSE species_e.\"English\" END AS \"ScientificName\", \"species\".\"EnglishName\" as \"EnglishName\", sum(\"sample\".\"CalculatedTotalWeight\") as \"Biomass_Kg\", classification_e.\"English\" AS \"Classification\" FROM \"sample\" INNER JOIN \"haul\" ON \"sample\".\"HaulId\" = \"haul\".\"Id\" INNER JOIN \"cruise\" ON \"haul\".\"CruiseId\" = \"cruise\".\"Id\" inner join \"species\" on \"sample\".\"SpecieId\" = \"species\".\"Id\" inner join \"port\" on \"cruise\".\"PortId\" = \"port\".\"Id\" LEFT JOIN translation classification_e ON sample.\"Classification\"::text = classification_e.\"Catalan\"::text LEFT JOIN translation species_e ON \"species\".\"ScientificName\"::text = species_e.\"Catalan\"::text WHERE \"sample\".\"HaulId\" = '0000' group by species_e.\"English\", \"species\".\"ScientificName\", \"species\".\"EnglishName\", classification_e.\"English\"";
-const haulSamplesPSQuery ="SELECT CASE WHEN species_e.\"English\" IS NULL THEN \"species\".\"ScientificName\" ELSE species_e.\"English\" END AS \"ScientificName\", \"species\".\"EnglishName\" as \"EnglishName\", sum(\"sample\".\"CalculatedTotalWeight\")/1000 as \"Biomass_T\", CASE WHEN sample.\"Classification\" = 'Comercial' AND (species.\"ScientificName\" = 'Sardina pilchardus' OR species.\"ScientificName\" = 'Engraulis encrasicolus') THEN 'Target' WHEN sample.\"Classification\" = 'Comercial' THEN 'By-Catch' ELSE classification_e.\"English\" END AS \"Classification\" FROM \"sample\" INNER JOIN \"haul\" ON \"sample\".\"HaulId\" = \"haul\".\"Id\" INNER JOIN \"cruise\" ON \"haul\".\"CruiseId\" = \"cruise\".\"Id\" inner join \"species\" on \"sample\".\"SpecieId\" = \"species\".\"Id\" inner join \"port\" on \"cruise\".\"PortId\" = \"port\".\"Id\" LEFT JOIN translation classification_e ON sample.\"Classification\"::text = classification_e.\"Catalan\"::text LEFT JOIN translation species_e ON \"species\".\"ScientificName\"::text = species_e.\"Catalan\"::text WHERE \"sample\".\"HaulId\" = '0000' group by species_e.\"English\", \"species\".\"ScientificName\", \"species\".\"EnglishName\", classification_e.\"English\", sample.\"Classification\"";
+const haulSamplesPSQuery ="SELECT CASE WHEN species_e.\"English\" IS NULL THEN \"species\".\"ScientificName\" ELSE species_e.\"English\" END AS \"ScientificName\", \"species\".\"EnglishName\" as \"EnglishName\", sum(\"sample\".\"CalculatedTotalWeight\")/1000 as \"Biomass_Kg\", CASE WHEN sample.\"Classification\" = 'Comercial' AND (species.\"ScientificName\" = 'Sardina pilchardus' OR species.\"ScientificName\" = 'Engraulis encrasicolus') THEN 'Target' WHEN sample.\"Classification\" = 'Comercial' THEN 'By-Catch' ELSE classification_e.\"English\" END AS \"Classification\" FROM \"sample\" INNER JOIN \"haul\" ON \"sample\".\"HaulId\" = \"haul\".\"Id\" INNER JOIN \"cruise\" ON \"haul\".\"CruiseId\" = \"cruise\".\"Id\" inner join \"species\" on \"sample\".\"SpecieId\" = \"species\".\"Id\" inner join \"port\" on \"cruise\".\"PortId\" = \"port\".\"Id\" LEFT JOIN translation classification_e ON sample.\"Classification\"::text = classification_e.\"Catalan\"::text LEFT JOIN translation species_e ON \"species\".\"ScientificName\"::text = species_e.\"Catalan\"::text WHERE \"sample\".\"HaulId\" = '0000' group by species_e.\"English\", \"species\".\"ScientificName\", \"species\".\"EnglishName\", classification_e.\"English\", sample.\"Classification\"";
 
 // Get the frequency of sizes given a species
-const sizesQuery = "SELECT * FROM \"sf_by_area_eng\"";//\"sf_by_year\"";
+const sizesQuery = "SELECT * FROM \"sf_by_year_eng\"";//\"sf_by_year\"";
 const sizesPSQuery = "SELECT * FROM \"sf_by_year_ps_eng\"";//\"sf_by_year\"";
 // Get color palette
 const paletteQuery = "SELECT * FROM \"color_palette_eng\"";
@@ -235,21 +235,20 @@ function saveJS_translation(tQuery, filename){
 
 //saveJSON(byPortQuery, "trawlingData/trawling_port_biomass");
 //saveJSON(shortByYearBiomassQuery, "trawlingData/trawling_season_biomass");
-//saveJSON(byPortPSQuery, "purseSeineData/ps_port_biomass");
-//saveJSON(shortByYearBiomassPSQuery, "purseSeineData/ps_season_biomass");
+// saveJSON(byPortPSQuery, "purseSeineData/ps_port_biomass");
+// saveJSON(shortByYearBiomassPSQuery, "purseSeineData/ps_season_biomass");
 
 //saveJSON(bySampleQuery, "samples");
 
 //saveJSON(trackLinesQuery, "trawlingData/trawling_hauls");
 //generateHaulStaticFiles();
 
-//generatePSHaulStaticFiles();
-
-//saveJSON(trackPointsPSQuery, "purseSeineData/ps_hauls");
+// saveJSON(trackPointsPSQuery, "purseSeineData/ps_hauls");
+// generatePSHaulStaticFiles();
 
 
 //saveJSON(sizesQuery, "trawlingData/trawling_sizes");
-//saveJSON(sizesPSQuery, "purseSeineData/ps_sizes");
+// saveJSON(sizesPSQuery, "purseSeineData/ps_sizes");
 
 //saveJS_palette(paletteQuery, "palette");
 
